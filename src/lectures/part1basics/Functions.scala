@@ -58,7 +58,7 @@ object Functions extends App {
       else num % d != 0 && hasDivisors(d - 1)
 
       hasDivisors(num / 2)
-    
+
   }
 
   println(isPrime(18))
