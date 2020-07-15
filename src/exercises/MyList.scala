@@ -13,7 +13,7 @@ abstract class MyList[+A] {
   def ++[B >: A](list: MyList[B]): MyList[B]
 }
 
-object Empty extends MyList[Nothing] {
+case object Empty extends MyList[Nothing] {
   def head: Nothing = throw new NoSuchElementException
   def tail: Nothing = throw new NoSuchElementException
   def isEmpty: Boolean = true
@@ -25,7 +25,7 @@ object Empty extends MyList[Nothing] {
   def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
 }
 
-class MyListImpl[+A](h: A, t: MyList[A]) extends MyList[A] {
+case class MyListImpl[+A](h: A, t: MyList[A]) extends MyList[A] {
   def head: A = h
   def tail: MyList[A] = t
   def isEmpty: Boolean = false
@@ -52,8 +52,8 @@ trait MyTransformer[-A, B] {
 }
 
 object MyListTest extends App {
-  val listOfIntegers: MyList[Int] = new MyListImpl(1, new MyListImpl(2, Empty))
-  val listOfStrings: MyList[String] = new MyListImpl("Java", new MyListImpl("Scala", Empty))
+  val listOfIntegers: MyList[Int] = MyListImpl(1, MyListImpl(2, Empty))
+  val listOfStrings: MyList[String] = MyListImpl("Java", MyListImpl("Scala", Empty))
 
   println(listOfIntegers.toString)
   println(listOfStrings.toString)
