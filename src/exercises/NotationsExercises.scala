@@ -1,4 +1,4 @@
-package lectures.part2oop
+package exercises
 
 object NotationsExercises extends App {
   class Person(val name: String, favoriteMovie: String, val age: Int = 42) {

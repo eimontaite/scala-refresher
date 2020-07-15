@@ -1,4 +1,4 @@
-package lectures.part2oop
+package exercises
 
 object OOBasicsExercises extends App {
   val author = new Author("Aiste", "Eimontaite", 1991)
