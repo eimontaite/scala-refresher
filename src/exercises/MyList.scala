@@ -7,9 +7,10 @@ abstract class MyList[+A] {
   def add[B >: A](a: B): MyList[B]
   def print: String
   override def toString: String = "[" + print + "]"
-  def map[B](transformer: MyTransformer[A, B]): MyList[B]
-  def flatMap[B](transformer: MyTransformer[A, MyList[B]]): MyList[B]
-  def filter(predicate: MyPredicate[A]): MyList[A]
+  // higher-order functions
+  def map[B](transformer: A => B): MyList[B]
+  def flatMap[B](transformer: A => MyList[B]): MyList[B]
+  def filter(predicate: A => Boolean): MyList[A]
   def ++[B >: A](list: MyList[B]): MyList[B]
 }
 
@@ -19,9 +20,9 @@ case object Empty extends MyList[Nothing] {
   def isEmpty: Boolean = true
   def add[B >: Nothing](a: B): MyList[B] = new MyListImpl(a, Empty)
   def print: String = ""
-  def map[B](transformer: MyTransformer[Nothing, B]): MyList[B] = Empty
-  def flatMap[B](transformer: MyTransformer[Nothing, MyList[B]]): MyList[B] = Empty
-  def filter(predicate: MyPredicate[Nothing]): MyList[Nothing] = Empty
+  def map[B](transformer: Nothing => B): MyList[B] = Empty
+  def flatMap[B](transformer: Nothing => MyList[B]): MyList[B] = Empty
+  def filter(predicate: Nothing => Boolean): MyList[Nothing] = Empty
   def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
 }
 
@@ -33,22 +34,14 @@ case class MyListImpl[+A](h: A, t: MyList[A]) extends MyList[A] {
   def print: String =
     if (tail.isEmpty) "" + h
     else h + " " + t.print
-  def map[B](transformer: MyTransformer[A, B]): MyList[B] =
-    new MyListImpl(transformer.transform(h), t.map(transformer))
+  def map[B](transformer: A => B): MyList[B] =
+    new MyListImpl(transformer(h), t.map(transformer))
   def ++[B >: A](list: MyList[B]): MyList[B] = new MyListImpl(h, t ++ list)
-  def flatMap[B](transformer: MyTransformer[A, MyList[B]]): MyList[B] =
-    transformer.transform(h) ++ t.flatMap(transformer)
-  def filter(predicate: MyPredicate[A]): MyList[A] =
-    if (predicate.test(h)) new MyListImpl(h, t.filter(predicate))
+  def flatMap[B](transformer: A => MyList[B]): MyList[B] =
+    transformer(h) ++ t.flatMap(transformer)
+  def filter(predicate: A => Boolean): MyList[A] =
+    if (predicate(h)) new MyListImpl(h, t.filter(predicate))
     else t.filter(predicate)
-}
-
-trait MyPredicate[-T] {
-  def test(el: T): Boolean
-}
-
-trait MyTransformer[-A, B] {
-  def transform(el: A): B
 }
 
 object MyListTest extends App {
@@ -59,13 +52,11 @@ object MyListTest extends App {
   println(listOfStrings.toString)
   println(listOfIntegers.head)
 
-  println(listOfIntegers.map(new MyTransformer[Int, Int] {
-    override def transform(el: Int): Int = el * 2
+  println(listOfIntegers.map(new Function1[Int, Int] {
+    override def apply(el: Int): Int = el * 2
   }))
 
-  println(listOfIntegers.filter(new MyPredicate[Int] {
-    override def test(el: Int): Boolean = el % 2 == 0
-  }).toString)
+  println(listOfIntegers.filter((el: Int) => el % 2 == 0).toString)
 
 
 }
